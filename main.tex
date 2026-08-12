@@ -1,0 +1,507 @@
+# `main.tex` completo
+
+```latex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{enumitem}
+
+\onehalfspacing
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% ==============================
+% PORTADA
+% ==============================
+
+\thispagestyle{empty}
+
+\begin{center}
+
+\vspace*{1cm}
+
+{\Large\textbf{UNIVERSIDAD TÉCNICA ESTATAL DE QUEVEDO}\par}
+
+\vspace{0.5cm}
+
+{\large Facultad de Ciencias de la Ingeniería\par}
+{\large Carrera de Ingeniería de Software\par}
+
+\vspace{2cm}
+
+{\Large\textbf{PRUEBA PRÁCTICA — UNIDAD IV}\par}
+
+\vspace{0.5cm}
+
+{\large Validación, Gestión, Herramientas y Estándares de Requisitos\par}
+
+\vspace{2cm}
+
+\textbf{Asignatura:} Ingeniería de Requisitos (ISR-401)
+
+\vspace{0.5cm}
+
+\textbf{Docente:} Ing. Gleiston Guerrero, Mg.
+
+\vspace{0.5cm}
+
+\textbf{Caso:} Sistema de Gestión de Pedidos
+
+\vspace{1.5cm}
+
+\textbf{Estudiante:} Robinson Espinoza Jeanpierre
+
+\vspace{0.5cm}
+
+\textbf{Fecha:} 11/08/2026
+
+\vfill
+
+\textbf{Link del Repositorio}
+
+\vspace{0.3cm}
+
+\url{https://github.com/jean200525/Evaluacion_UnidadIV.git}
+
+\end{center}
+
+\clearpage
+
+% ==============================
+% P1
+% ==============================
+
+
+\section{P1. Modelo de datos — Diagrama de clases UML}
+
+El diagrama de clases representa el dominio del Sistema de Gestión de Pedidos mediante las clases Cliente, Pedido, LíneaPedido y Producto.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth,height=0.45\textheight,keepaspectratio]{diagrama_clases.png}
+    \caption{Diagrama de clases UML — Sistema de Gestión de Pedidos.}
+    \label{fig:clases}
+\end{figure}
+
+% ==============================
+% P2
+% ==============================
+
+\section{P2. Modelo funcional — Diagrama de actividades UML}
+
+El proceso ``Registrar pedido'' se modela mediante un nodo inicial, una decisión relacionada con la disponibilidad de stock, dos caminos alternativos para confirmar el pedido o notificar el faltante, su convergencia y un nodo final. También se incluyen carriles de responsabilidad para Cliente y Sistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth,height=0.45\textheight,keepaspectratio]{diagrama_actividades.png}
+    \caption{Diagrama de actividades UML — Registrar pedido.}
+    \label{fig:actividades}
+\end{figure}
+
+% ==============================
+% P3
+% ==============================
+
+\section{P3. Modelo de comportamiento — Máquina de estados UML}
+
+La máquina de estados representa el ciclo de vida de un Pedido mediante los estados Registrado, Confirmado, Enviado, Entregado y Cancelado.
+
+Cada transición se encuentra etiquetada con su evento correspondiente. Además, se incluye la guarda \texttt{[stock disponible]} en \texttt{confirmar()} y la guarda \texttt{[no entregado]} en \texttt{anular()}. La transición de anulación se factoriza mediante el superestado EnProceso, que agrupa los estados Confirmado y Enviado.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth,height=0.45\textheight,keepaspectratio]{maquina_estados.png}
+    \caption{Máquina de estados UML — Ciclo de vida del Pedido.}
+    \label{fig:estados}
+\end{figure}
+
+% ==============================
+% P4
+% ==============================
+
+\section{P4. Consistencia entre las tres perspectivas}
+
+La siguiente tabla presenta la verificación cruzada entre los eventos de la máquina de estados (P3), las funciones o acciones del diagrama de actividades (P2) y las entidades o atributos del diagrama de clases (P1).
+
+\begin{longtable}{p{3cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Evento (P3)} & \textbf{Función/acción (P2)} & \textbf{Entidad/atributo (P1)} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Evento (P3)} & \textbf{Función/acción (P2)} & \textbf{Entidad/atributo (P1)} \\
+\midrule
+\endhead
+
+\texttt{registrar()} &
+Cliente ingresa datos del pedido &
+Pedido (creación), Cliente (asociación) \\
+
+\texttt{confirmar()} [stock disponible] &
+Confirmar pedido &
+Pedido.estado, Producto.stock (\texttt{descontarStock}) \\
+
+--- (no existe en P3) &
+Notificar faltante &
+Producto.stock (\texttt{verificarStock}) \\
+
+\texttt{despachar()} &
+No modelado en P2 original &
+Pedido.estado \\
+
+\texttt{entregar()} &
+No modelado en P2 original &
+Pedido.estado \\
+
+\texttt{anular()} &
+No modelado en P2 original &
+Pedido.estado \\
+
+\bottomrule
+\end{longtable}
+
+\subsection*{Inconsistencia detectada}
+
+El diagrama de actividades original (P2) solamente cubre el subproceso ``Registrar pedido'', hasta las acciones de confirmar o notificar faltante. Sin embargo, la máquina de estados (P3) incluye eventos posteriores como \texttt{despachar()}, \texttt{entregar()} y \texttt{anular()}, que no tenían una función equivalente modelada en el diagrama de actividades.
+
+Por lo tanto, se identificó un defecto de tipo ``evento sin función''.
+
+\subsection*{Corrección aplicada}
+
+Se define un segundo proceso de actividades denominado ``Gestionar ciclo de vida del pedido'', en el cual se modelan explícitamente las actividades Despachar pedido, Entregar pedido y Anular pedido. Cada actividad dispara la transición correspondiente registrada en P3.
+
+Con esta adición, los tres modelos quedan mutuamente consistentes.
+
+% ==============================
+% P5
+% ==============================
+
+\section{P5. Especificación de requisitos con esquema de atributos}
+
+Se presentan dos requisitos funcionales y dos requisitos no funcionales. Cada requisito no funcional identifica una característica de ISO/IEC 25010:2023, establece una métrica y define un umbral.
+
+\subsection{RF-01 — Requisito funcional}
+
+El sistema debe permitir registrar un nuevo pedido asociando cliente, líneas de pedido y verificando disponibilidad de stock antes de confirmarlo.
+
+\begin{longtable}{p{5cm}p{9cm}}
+\toprule
+\textbf{Atributo} & \textbf{Valor} \\
+\midrule
+Identificador & RF-01 \\
+Prioridad & Alta \\
+Estado & Propuesto \\
+Fuente & Caso de negocio — módulo de gestión de pedidos \\
+Estabilidad & Alta \\
+Versión & 1.0 \\
+Método de verificación & Prueba funcional (stock suficiente / insuficiente) \\
+\bottomrule
+\end{longtable}
+
+\subsection{RF-02 — Requisito funcional}
+
+El sistema debe permitir anular un pedido confirmado siempre que no haya sido entregado.
+
+\begin{longtable}{p{5cm}p{9cm}}
+\toprule
+\textbf{Atributo} & \textbf{Valor} \\
+\midrule
+Identificador & RF-02 \\
+Prioridad & Media \\
+Estado & Propuesto \\
+Fuente & Caso de negocio \\
+Estabilidad & Media \\
+Versión & 1.0 \\
+Método de verificación & Prueba funcional (anular en distintos estados) \\
+\bottomrule
+\end{longtable}
+
+\subsection{RNF-01 — Requisito no funcional — Eficiencia de desempeño}
+
+El sistema debe registrar un pedido en menos de 3 segundos bajo carga normal, considerando hasta 50 usuarios concurrentes.
+
+\begin{longtable}{p{5cm}p{9cm}}
+\toprule
+\textbf{Atributo} & \textbf{Valor} \\
+\midrule
+Característica & Eficiencia de desempeño (ISO/IEC 25010:2023) \\
+Métrica & Tiempo de respuesta (segundos) \\
+Umbral & $<3$ s \\
+Identificador & RNF-01 \\
+Prioridad & Alta \\
+Estado & Propuesto \\
+Fuente & Requisito de negocio (competitividad del servicio) \\
+Estabilidad & Alta \\
+Versión & 1.0 \\
+Método de verificación & Prueba de rendimiento (carga) \\
+\bottomrule
+\end{longtable}
+
+\subsection{RNF-02 — Requisito no funcional — Seguridad}
+
+Los datos personales del cliente (cédula/RUC y correo) deben almacenarse cifrados y ser accesibles solamente mediante autenticación.
+
+\begin{longtable}{p{5cm}p{9cm}}
+\toprule
+\textbf{Atributo} & \textbf{Valor} \\
+\midrule
+Característica & Seguridad (ISO/IEC 25010:2023) \\
+Métrica & Porcentaje de campos sensibles cifrados en reposo \\
+Umbral & 100\% de los campos sensibles cifrados \\
+Identificador & RNF-02 \\
+Prioridad & Alta \\
+Estado & Propuesto \\
+Fuente & Normativa de protección de datos \\
+Estabilidad & Alta \\
+Versión & 1.0 \\
+Método de verificación & Auditoría de seguridad / prueba de penetración básica \\
+\bottomrule
+\end{longtable}
+
+% ==============================
+% P6
+% ==============================
+
+\section{P6. Priorización MoSCoW}
+
+\begin{longtable}{p{3cm}p{3cm}p{9cm}}
+\toprule
+\textbf{Requisito} & \textbf{Categoría} & \textbf{Justificación} \\
+\midrule
+RF-01 & Must have &
+Sin registrar pedidos con verificación de stock no existe el sistema; es el núcleo funcional. \\
+
+RNF-02 & Must have &
+Proteger los datos personales es obligatorio legal y contractualmente; no es negociable. \\
+
+RF-02 & Should have &
+Es importante para la operación y el control de errores/cancelaciones, pero el sistema puede operar sin ella en una primera versión. \\
+
+RNF-01 & Could have &
+Es deseable para la experiencia de usuario, pero no bloquea la operación básica si se entrega en una versión posterior. \\
+
+\bottomrule
+\end{longtable}
+
+% ==============================
+% P7
+% ==============================
+
+\section{P7. Validación por inspección}
+
+Se aplica una lista de comprobación basada en ISO/IEC/IEEE 29148 para evaluar ambigüedad, completitud, singularidad, verificabilidad y factibilidad de los requisitos.
+
+\subsection{Paso 1 — Identificación de defectos}
+
+\begin{longtable}{p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{5cm}}
+\toprule
+\textbf{Req.} &
+\textbf{No ambiguo} &
+\textbf{Completo} &
+\textbf{Singular} &
+\textbf{Verificable} &
+\textbf{Factible} &
+\textbf{Defecto detectado} \\
+\midrule
+
+RF-01 & Sí & No & Sí & Sí & Sí &
+No especifica qué pasa si el cliente no existe (incompleto). \\
+
+RF-02 & Sí & Sí & No & Sí & Sí &
+Mezcla dos condiciones (confirmado / no entregado) en un solo enunciado; no es singular. \\
+
+RNF-01 & Sí & Sí & Sí & Sí & No &
+El umbral ``$<3$ s'' no aclara si incluye tiempo de red; factibilidad cuestionable. \\
+
+RNF-02 & No & Sí & Sí & Sí & Sí &
+``Cifrados'' es ambiguo: no especifica algoritmo o estándar mínimo. \\
+
+\bottomrule
+\end{longtable}
+
+\subsection{Paso 2 — Retrabajo: requisitos corregidos}
+
+\textbf{RF-01 (v1.1):} El sistema debe permitir registrar un pedido para un cliente previamente registrado, asociando una o más líneas de pedido, y validar la disponibilidad de stock de cada producto antes de confirmar el pedido.
+
+\medskip
+
+\textbf{RF-02a (v1.1):} El sistema debe permitir anular un pedido que se encuentre en estado Confirmado.
+
+\medskip
+
+\textbf{RF-02b (v1.1):} El sistema debe permitir anular un pedido que se encuentre en estado Enviado, siempre que no haya sido entregado.
+
+\medskip
+
+\textbf{RNF-01 (v1.1):} El sistema debe completar el registro de un pedido, desde el envío del formulario hasta la confirmación en pantalla, en menos de 3 segundos, medido en el servidor, bajo una carga de hasta 50 usuarios concurrentes.
+
+\medskip
+
+\textbf{RNF-02 (v1.1):} Los datos personales del cliente (cédula/RUC y correo) deben cifrarse en reposo usando AES-256 y ser accesibles solamente mediante autenticación válida.
+
+% ==============================
+% P8
+% ==============================
+
+\section{P8. Pruebas de aceptación trazadas}
+
+\begin{longtable}{p{1.5cm}p{2cm}p{4cm}p{5cm}p{2cm}}
+\toprule
+\textbf{ID} & \textbf{Tipo} & \textbf{Entradas} & \textbf{Criterio de éxito} & \textbf{Traza a} \\
+\midrule
+
+PA-01 & Funcional &
+Pedido con producto de stock=5, cantidad=2 &
+El pedido queda en estado Confirmado y el stock se reduce a 3 &
+RF-01 \\
+
+PA-02 & Funcional &
+Pedido en estado ``Confirmado'' &
+Al anular, el pedido pasa a ``Cancelado'' y no puede volver a confirmarse &
+RF-02 \\
+
+PA-03 & No funcional &
+50 usuarios concurrentes registrando pedidos &
+El 95\% de las solicitudes se completa en $<3$ s &
+RNF-01 \\
+
+PA-04 & No funcional &
+Consulta directa a BD del campo correo &
+El campo se muestra cifrado, no legible en texto plano &
+RNF-02 \\
+
+\bottomrule
+\end{longtable}
+
+% ==============================
+% P9
+% ==============================
+
+\section{P9. Matriz de trazabilidad}
+
+\begin{longtable}{p{2cm}p{3cm}p{4cm}p{2.5cm}p{3cm}p{1.5cm}}
+\toprule
+\textbf{Requisito} &
+\textbf{Fuente} &
+\textbf{Modelo (traza adelante)} &
+\textbf{Prueba} &
+\textbf{Dependencia horizontal} &
+\textbf{Huérfano} \\
+\midrule
+
+RF-01 &
+Caso de negocio &
+P1 (Pedido, LíneaPedido, Producto), P2 &
+PA-01 &
+Depende de RNF-02 &
+No \\
+
+RF-02 &
+Caso de negocio &
+P3 (máquina de estados) &
+PA-02 &
+-- &
+No \\
+
+RNF-01 &
+Requisito de negocio &
+P2 (actividad ``Registrar pedido'') &
+PA-03 &
+Relacionado con RF-01 &
+No \\
+
+RNF-02 &
+Normativa protección de datos &
+P1 (clase Cliente) &
+PA-04 &
+RF-01 depende de este &
+No \\
+
+\bottomrule
+\end{longtable}
+
+\subsection*{Resultado}
+
+No se detectan requisitos huérfanos: los cuatro requisitos cuentan con al menos un modelo y una prueba de aceptación asociados.
+
+% ==============================
+% P10
+% ==============================
+
+\section{P10. Gestión del cambio y línea base}
+
+\subsection{Solicitud de cambio SC-01}
+
+\textbf{Descripción:} El área comercial solicita que RNF-01 reduzca el umbral de 3 segundos a 2 segundos para mejorar la competitividad del servicio.
+
+\medskip
+
+\textbf{Requisito afectado:} RNF-01.
+
+\medskip
+
+\textbf{Solicitante:} Área comercial.
+
+\subsection{Análisis de impacto}
+
+Al modificar RNF-01 se ve afectada la prueba PA-03, debido a que debe recalibrarse el umbral. También podría verse afectado RF-01, ya que ambos comparten el flujo ``Registrar pedido'' en P2.
+
+No se afectan P1 ni P3.
+
+\subsection{Decisión del CCB}
+
+La solicitud es aprobada, condicionada a validar la factibilidad técnica de la infraestructura mediante una prueba de carga adicional antes de aceptar el nuevo umbral.
+
+\subsection{Actualización de versión}
+
+RNF-01 pasa de la versión 1.1 a la versión 1.2.
+
+\subsection{Línea base (baseline) declarada}
+
+La configuración congelada queda conformada por:
+
+\begin{itemize}
+    \item ERS v1.2 (con RNF-01 actualizado).
+    \item Modelo de clases P1 v1.0.
+    \item Modelo de actividades P2 v1.0.
+    \item Máquina de estados P3 v1.0.
+    \item Matriz de trazabilidad P9 v1.1.
+    \item Conjunto de pruebas de aceptación v1.1 (PA-01 a PA-04, con PA-03 pendiente de recalibración posterior a la aprobación).
+\end{itemize}
+
+% ==============================
+% REFERENCIAS
+% ==============================
+
+\section{Referencias}
+
+\begin{enumerate}
+    \item ISO/IEC/IEEE 29148, \textit{Systems and software engineering — Life cycle processes — Requirements engineering}.
+    
+    \item ISO/IEC 25010:2023, \textit{Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model}.
+    
+    \item OMG, \textit{Unified Modeling Language (UML)}.
+\end{enumerate}
+
+\end{document}
+```
